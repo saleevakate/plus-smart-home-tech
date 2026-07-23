@@ -24,12 +24,8 @@ public class ScenarioAddedEvent extends HubEvent {
     @NotNull
     private List<DeviceAction> actions;
 
-    @NotNull
-    @JsonProperty("type")
-    private HubEventType type = HubEventType.SCENARIO_ADDED;
-
     @Override
     public HubEventType getType() {
-        return type;
+        return HubEventType.SCENARIO_ADDED;
     }
 }
