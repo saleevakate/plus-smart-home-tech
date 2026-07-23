@@ -27,7 +27,7 @@ public class EventServiceImpl implements EventService {
     public void sendSensorEvent(SensorEvent event) {
         SensorEventAvro avroEvent = sensorEventMapper.toAvro(event);
         kafkaTemplate.send(SENSOR_TOPIC, event.getHubId(), avroEvent);
-        log.info("Отправлено событие датчика в топик {}: {}", SENSOR_TOPIC, avroEvent);
+        log.info("Отправлено событие датчика в топик  {}: {}", SENSOR_TOPIC, avroEvent);
     }
 
     @Override
