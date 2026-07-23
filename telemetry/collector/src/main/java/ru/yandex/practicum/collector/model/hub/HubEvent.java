@@ -31,5 +31,4 @@ public abstract class HubEvent {
 
     @NotNull
     public abstract HubEventType getType();
-
 }
