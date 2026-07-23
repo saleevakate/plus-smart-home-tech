@@ -59,7 +59,7 @@ import idl "SensorEventProtocol.avdl";
 
     record HubEventAvro {
         string hub_id;
-        @logicalType("timestamp-millis") long timestamp;
+        long timestamp;
         union {
             null,
             DeviceAddedEventAvro,

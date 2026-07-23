@@ -7,15 +7,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.yandex.practicum.collector.model.enums.HubEventType;
 
-import java.time.Instant;
 import java.util.List;
 
 @Data
 public class ScenarioAddedEvent extends HubEvent {
-    @NotBlank
-    private String hubId;
-
-    private Instant timestamp = Instant.now();
 
     @NotBlank
     @Size(min = 3)

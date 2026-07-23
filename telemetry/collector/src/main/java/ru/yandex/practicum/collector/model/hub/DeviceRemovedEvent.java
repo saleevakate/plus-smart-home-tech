@@ -6,14 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.yandex.practicum.collector.model.enums.HubEventType;
 
-import java.time.Instant;
-
 @Data
 public class DeviceRemovedEvent extends HubEvent {
-    @NotBlank
-    private String hubId;
-
-    private Instant timestamp = Instant.now();
 
     @NotBlank
     private String id;

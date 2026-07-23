@@ -16,7 +16,7 @@ public class HubEventMapper {
 
         HubEventAvro.Builder builder = HubEventAvro.newBuilder();
         builder.setHubId(event.getHubId());
-        builder.setTimestamp(event.getTimestamp());
+        builder.setTimestamp(event.getTimestamp().toEpochMilli());
 
         switch (event.getType()) {
             case DEVICE_ADDED -> {

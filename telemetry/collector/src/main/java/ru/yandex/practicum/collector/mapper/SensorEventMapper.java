@@ -13,7 +13,7 @@ public class SensorEventMapper {
         SensorEventAvro.Builder builder = SensorEventAvro.newBuilder();
         builder.setId(event.getId());
         builder.setHubId(event.getHubId());
-        builder.setTimestamp(event.getTimestamp());
+        builder.setTimestamp(event.getTimestamp().toEpochMilli());
 
         switch (event.getType()) {
             case LIGHT_SENSOR_EVENT -> {

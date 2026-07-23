@@ -1,3 +1,4 @@
+set PATH=%PATH%;C:\Users\gabud\.jdks\corretto-21.0.11\bin
 @echo off
 chcp 65001 >nul
 setlocal enabledelayedexpansion

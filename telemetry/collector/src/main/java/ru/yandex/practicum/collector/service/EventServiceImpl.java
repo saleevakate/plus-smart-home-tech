@@ -33,6 +33,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public void sendHubEvent(HubEvent event) {
         HubEventAvro avroEvent = hubEventMapper.toAvro(event);
+        System.out.println("Отправляю в Kafka: " + avroEvent);
         kafkaTemplate.send(HUB_TOPIC, event.getHubId(), avroEvent);
         log.info("Отправлено событие хаба в топик {}: {}", HUB_TOPIC, avroEvent);
     }
