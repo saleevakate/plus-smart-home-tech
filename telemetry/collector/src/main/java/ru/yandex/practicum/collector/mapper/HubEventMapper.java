@@ -3,7 +3,6 @@ package ru.yandex.practicum.collector.mapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.model.hub.*;
 import ru.yandex.practicum.kafka.telemetry.event.*;
-import ru.yandex.practicum.collector.model.enums.HubEventType;
 
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ public class HubEventMapper {
 
         HubEventAvro.Builder builder = HubEventAvro.newBuilder();
         builder.setHubId(event.getHubId());
-        builder.setTimestamp(event.getTimestamp().toEpochMilli());
+        builder.setTimestamp(event.getTimestamp());
 
         switch (event.getType()) {
             case DEVICE_ADDED -> {

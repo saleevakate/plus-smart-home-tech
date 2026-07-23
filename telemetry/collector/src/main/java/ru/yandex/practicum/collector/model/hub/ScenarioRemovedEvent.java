@@ -23,4 +23,9 @@ public class ScenarioRemovedEvent extends HubEvent {
     @NotNull
     @JsonProperty("type")
     private HubEventType type = HubEventType.SCENARIO_REMOVED;
+
+    @Override
+    public HubEventType getType() {
+        return type;
+    }
 }

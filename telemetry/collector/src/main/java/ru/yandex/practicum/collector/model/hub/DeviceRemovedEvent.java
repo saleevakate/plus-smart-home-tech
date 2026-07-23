@@ -21,4 +21,10 @@ public class DeviceRemovedEvent extends HubEvent {
     @NotNull
     @JsonProperty("type")
     private HubEventType type = HubEventType.DEVICE_REMOVED;
+
+    @Override
+    public HubEventType getType() {
+        return type;
+    }
+
 }
