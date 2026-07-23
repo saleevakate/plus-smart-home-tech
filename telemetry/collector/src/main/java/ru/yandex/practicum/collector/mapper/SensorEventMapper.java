@@ -4,21 +4,17 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.model.sensor.*;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 
-import static ru.yandex.practicum.collector.model.enums.SensorEventType.*;
-
-
 @Component
 public class SensorEventMapper {
 
     public SensorEventAvro toAvro(SensorEvent event) {
-        if (event == null) {
-            return null;
-        }
+        if (event == null) return null;
 
         SensorEventAvro.Builder builder = SensorEventAvro.newBuilder();
         builder.setId(event.getId());
         builder.setHubId(event.getHubId());
         builder.setTimestamp(event.getTimestamp().toEpochMilli());
+
         switch (event.getType()) {
             case LIGHT_SENSOR_EVENT -> {
                 LightSensorEvent lightEvent = (LightSensorEvent) event;
@@ -28,7 +24,6 @@ public class SensorEventMapper {
                         .build();
                 builder.setPayload(lightAvro);
             }
-
             case TEMPERATURE_SENSOR_EVENT -> {
                 TemperatureSensorEvent tempEvent = (TemperatureSensorEvent) event;
                 TemperatureSensorAvro tempAvro = TemperatureSensorAvro.newBuilder()
@@ -37,7 +32,6 @@ public class SensorEventMapper {
                         .build();
                 builder.setPayload(tempAvro);
             }
-
             case MOTION_SENSOR_EVENT -> {
                 MotionSensorEvent motionEvent = (MotionSensorEvent) event;
                 MotionSensorAvro motionAvro = MotionSensorAvro.newBuilder()
@@ -47,7 +41,6 @@ public class SensorEventMapper {
                         .build();
                 builder.setPayload(motionAvro);
             }
-
             case SWITCH_SENSOR_EVENT -> {
                 SwitchSensorEvent switchEvent = (SwitchSensorEvent) event;
                 SwitchSensorAvro switchAvro = SwitchSensorAvro.newBuilder()
@@ -55,7 +48,6 @@ public class SensorEventMapper {
                         .build();
                 builder.setPayload(switchAvro);
             }
-
             case CLIMATE_SENSOR_EVENT -> {
                 ClimateSensorEvent climateEvent = (ClimateSensorEvent) event;
                 ClimateSensorAvro climateAvro = ClimateSensorAvro.newBuilder()
@@ -65,8 +57,7 @@ public class SensorEventMapper {
                         .build();
                 builder.setPayload(climateAvro);
             }
-
-            default -> throw new IllegalArgumentException("Неизвестный тип события датчика: " + event.getType());
+            default -> throw new IllegalArgumentException("Неизвестный тип: " + event.getType());
         }
 
         return builder.build();

@@ -2,8 +2,8 @@ package ru.yandex.practicum.collector.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.model.hub.*;
-import ru.yandex.practicum.collector.model.hub.HubEvent;
 import ru.yandex.practicum.kafka.telemetry.event.*;
+import ru.yandex.practicum.collector.model.enums.HubEventType;
 
 import java.util.stream.Collectors;
 
