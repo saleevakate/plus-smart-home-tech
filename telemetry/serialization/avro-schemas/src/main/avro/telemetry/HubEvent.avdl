@@ -1,7 +1,7 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
-protocol HubEvent {
+protocol HubEventProtocol {
 
-    import idl "SensorEvent.avdl";
+    import "SensorEventProtocol.avdl";
 
     enum ConditionTypeAvro {
         MOTION,

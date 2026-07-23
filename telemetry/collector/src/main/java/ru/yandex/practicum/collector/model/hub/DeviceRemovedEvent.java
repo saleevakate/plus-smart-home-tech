@@ -9,7 +9,7 @@ import ru.yandex.practicum.collector.model.enums.HubEventType;
 import java.time.Instant;
 
 @Data
-public class DeviceRemovedEvent {
+public class DeviceRemovedEvent extends HubEvent {
     @NotBlank
     private String hubId;
 

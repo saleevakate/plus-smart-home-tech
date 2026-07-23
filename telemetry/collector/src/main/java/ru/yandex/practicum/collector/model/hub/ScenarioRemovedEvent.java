@@ -10,7 +10,7 @@ import ru.yandex.practicum.collector.model.enums.HubEventType;
 import java.time.Instant;
 
 @Data
-public class ScenarioRemovedEvent {
+public class ScenarioRemovedEvent extends HubEvent {
     @NotBlank
     private String hubId;
 

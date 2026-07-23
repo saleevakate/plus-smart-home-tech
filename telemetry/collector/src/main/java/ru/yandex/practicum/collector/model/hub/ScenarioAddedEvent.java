@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
-public class ScenarioAddedEvent {
+public class ScenarioAddedEvent extends HubEvent {
     @NotBlank
     private String hubId;
 
