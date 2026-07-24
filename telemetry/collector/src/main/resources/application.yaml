@@ -4,6 +4,3 @@ server:
 spring:
   kafka:
     bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: ru.yandex.practicum.collector.serialization.GeneralAvroSerializer
