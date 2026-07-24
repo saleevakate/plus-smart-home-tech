@@ -18,5 +18,5 @@ public class ScenarioCondition {
     @NotNull
     private ConditionOperation operation;
 
-    private Object value;
+    private Integer value;
 }

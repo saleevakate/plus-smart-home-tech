@@ -38,7 +38,7 @@ import idl "SensorEventProtocol.avdl";
         string sensor_id;
         ConditionTypeAvro type;
         ConditionOperationAvro operation;
-        union { null, boolean, int } value = null;
+        union { null, int } value = null;
     }
 
     record DeviceActionAvro {
@@ -61,7 +61,6 @@ import idl "SensorEventProtocol.avdl";
         string hub_id;
         long timestamp;
         union {
-            null,
             DeviceAddedEventAvro,
             DeviceRemovedEventAvro,
             ScenarioAddedEventAvro,
