@@ -36,8 +36,13 @@ public class AggregationService {
             long eventTimestamp = event.getTimestamp();
 
             if (existingTimestamp > eventTimestamp) {
-                log.debug("Пропуск устаревшего события для датчика {}: существующий timestamp={}, новый={}",
-                        sensorId, existingTimestamp, eventTimestamp);
+                log.debug("Пропуск устаревшего события для датчика {}", sensorId);
+                return Optional.empty();
+            }
+
+            if (existingState.getData().equals(event.getPayload())) {
+                log.debug("Данные для датчика {} не изменились", sensorId);
+                snapshot.setTimestamp(event.getTimestamp());
                 return Optional.empty();
             }
         }
