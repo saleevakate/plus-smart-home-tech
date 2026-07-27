@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.mapper.SensorEventProtoMapper;
 import ru.yandex.practicum.collector.model.sensor.SensorEvent;
 import ru.yandex.practicum.collector.service.EventService;
-import ru.yandex.practicum.grpc.telemetry.messages.SensorEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 
 @Slf4j
 @Component

@@ -7,7 +7,7 @@ import ru.yandex.practicum.collector.model.enums.ConditionType;
 import ru.yandex.practicum.collector.model.enums.DeviceType;
 import ru.yandex.practicum.collector.model.hub.*;
 import ru.yandex.practicum.collector.model.hub.HubEvent;
-import ru.yandex.practicum.grpc.telemetry.messages.*;
+import ru.yandex.practicum.grpc.telemetry.event.*;
 
 import java.time.Instant;
 import java.util.ArrayList;

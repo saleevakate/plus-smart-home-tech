@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.mapper.HubEventProtoMapper;
 import ru.yandex.practicum.collector.model.hub.HubEvent;
 import ru.yandex.practicum.collector.service.EventService;
-import ru.yandex.practicum.grpc.telemetry.messages.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+
 
 @Slf4j
 @Component

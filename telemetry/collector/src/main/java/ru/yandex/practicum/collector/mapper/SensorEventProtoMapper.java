@@ -3,7 +3,8 @@ package ru.yandex.practicum.collector.mapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.collector.model.sensor.*;
 import ru.yandex.practicum.collector.model.sensor.SensorEvent;
-import ru.yandex.practicum.grpc.telemetry.messages.*;
+import ru.yandex.practicum.grpc.telemetry.event.*;
+
 
 import java.time.Instant;
 
