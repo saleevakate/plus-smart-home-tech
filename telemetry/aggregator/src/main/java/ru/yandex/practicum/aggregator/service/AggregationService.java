@@ -40,11 +40,6 @@ public class AggregationService {
                         sensorId, existingTimestamp, eventTimestamp);
                 return Optional.empty();
             }
-
-            if (existingState.getData().equals(event.getPayload())) {
-                log.debug("Данные для датчика {} не изменились", sensorId);
-                return Optional.empty();
-            }
         }
 
         SensorStateAvro newState = createSensorState(event);
