@@ -61,6 +61,11 @@ public class HubEventProtoMapper {
 
     private ScenarioAddedEvent toScenarioAddedEvent(HubEventProto proto) {
         ScenarioAddedEventProto scenario = proto.getScenarioAdded();
+
+        if (scenario.getName() == null || scenario.getName().isEmpty()) {
+            throw new IllegalArgumentException("Scenario name is required");
+        }
+
         ScenarioAddedEvent event = new ScenarioAddedEvent();
         event.setHubId(proto.getHubId());
         event.setTimestamp(Instant.ofEpochSecond(
@@ -75,8 +80,11 @@ public class HubEventProtoMapper {
             c.setSensorId(condition.getSensorId());
             c.setType(ConditionType.valueOf(condition.getType().name()));
             c.setOperation(ConditionOperation.valueOf(condition.getOperation().name()));
+
             if (condition.hasIntValue()) {
                 c.setValue(condition.getIntValue());
+            } else if (condition.hasBoolValue()) {
+                c.setValue(condition.getBoolValue() ? 1 : 0);
             }
             conditions.add(c);
         }
