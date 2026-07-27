@@ -42,7 +42,7 @@ public class HubEventProtoMapper {
                 proto.getTimestamp().getSeconds(),
                 proto.getTimestamp().getNanos()
         ));
-        event.setHubId(device.getId());
+        event.setId(device.getId());
         event.setDeviceType(DeviceType.valueOf(device.getType().name()));
         return event;
     }
@@ -55,7 +55,7 @@ public class HubEventProtoMapper {
                 proto.getTimestamp().getSeconds(),
                 proto.getTimestamp().getNanos()
         ));
-        event.setHubId(device.getId());
+        event.setId(device.getId());
         return event;
     }
 
