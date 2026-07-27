@@ -7,7 +7,7 @@ import "telemetry/messages/sensor_event.proto";
 package telemetry.services;
 
 option java_multiple_files = true;
-option java_package = "ru.yandex.practicum.grpc.telemetry.services";
+option java_package = "ru.yandex.practicum.grpc.telemetry.collector";
 
 service CollectorController {
   rpc CollectSensorEvent (telemetry.messages.SensorEventProto) returns (google.protobuf.Empty);
