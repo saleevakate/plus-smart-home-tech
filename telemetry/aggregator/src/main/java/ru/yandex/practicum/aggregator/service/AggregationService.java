@@ -29,6 +29,8 @@ public class AggregationService {
             return Optional.of(snapshot);
         }
 
+        snapshot.setTimestamp(event.getTimestamp());
+
         SensorStateAvro existingState = snapshot.getSensorsState().get(sensorId);
 
         if (existingState != null) {
@@ -44,9 +46,9 @@ public class AggregationService {
 
         SensorStateAvro newState = createSensorState(event);
         snapshot.getSensorsState().put(sensorId, newState);
-        snapshot.setTimestamp(event.getTimestamp());
 
-        log.info("Обновлён снапшот для хаба {}: датчик {} обновлён", hubId, sensorId);
+        log.info("Обновлён снапшот для хаба {}: датчик {} обновлён (timestamp={})",
+                hubId, sensorId, event.getTimestamp());
         return Optional.of(snapshot);
     }
 
