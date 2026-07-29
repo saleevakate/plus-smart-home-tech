@@ -23,3 +23,6 @@ kafka:
   bootstrap-servers: localhost:9092
   poll:
     timeout: 1000
+  topics:
+      hubs: telemetry.hubs.v1
+      snapshots: telemetry.snapshots.v1

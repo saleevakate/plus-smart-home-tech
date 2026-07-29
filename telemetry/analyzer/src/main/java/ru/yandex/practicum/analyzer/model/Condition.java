@@ -1,14 +1,12 @@
 package ru.yandex.practicum.analyzer.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.yandex.practicum.analyzer.model.enums.ConditionOperation;
 import ru.yandex.practicum.analyzer.model.enums.ConditionType;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor

@@ -16,9 +16,10 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class SnapshotProcessor {
 
-    private static final String SNAPSHOTS_TOPIC = "telemetry.snapshots.v1";
+    @Value("${kafka.topics.snapshots}")
+    private String snapshotsTopic;
 
-    private final Consumer<String, Object> snapshotConsumer;
+    private final Consumer<String, SensorsSnapshotAvro> snapshotConsumer;
     private final ScenarioService scenarioService;
 
     @Value("${kafka.poll.timeout:1000}")
@@ -26,11 +27,11 @@ public class SnapshotProcessor {
 
     public void start() {
         try {
-            snapshotConsumer.subscribe(java.util.List.of(SNAPSHOTS_TOPIC));
-            log.info("SnapshotProcessor подписался на топик: {}", SNAPSHOTS_TOPIC);
+            snapshotConsumer.subscribe(java.util.List.of(snapshotsTopic));
+            log.info("SnapshotProcessor подписался на топик: {}", snapshotsTopic);
 
             while (true) {
-                ConsumerRecords<String, Object> records = snapshotConsumer.poll(Duration.ofMillis(pollTimeout));
+                ConsumerRecords<String, SensorsSnapshotAvro> records = snapshotConsumer.poll(Duration.ofMillis(pollTimeout));
 
                 if (records.isEmpty()) {
                     continue;
@@ -40,7 +41,7 @@ public class SnapshotProcessor {
 
                 for (var record : records) {
                     try {
-                        SensorsSnapshotAvro snapshot = (SensorsSnapshotAvro) record.value();
+                        SensorsSnapshotAvro snapshot = record.value();
                         scenarioService.processSnapshot(snapshot);
                     } catch (Exception e) {
                         log.error("Ошибка обработки снапшота", e);

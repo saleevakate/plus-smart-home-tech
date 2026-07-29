@@ -16,9 +16,10 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class HubEventProcessor implements Runnable {
 
-    private static final String HUBS_TOPIC = "telemetry.hubs.v1";
+    @Value("${kafka.topics.hubs}")
+    private String hubsTopic;
 
-    private final Consumer<String, Object> hubEventConsumer;
+    private final Consumer<String, HubEventAvro> hubEventConsumer;
     private final ScenarioService scenarioService;
 
     @Value("${kafka.poll.timeout:1000}")
@@ -27,11 +28,11 @@ public class HubEventProcessor implements Runnable {
     @Override
     public void run() {
         try {
-            hubEventConsumer.subscribe(java.util.List.of(HUBS_TOPIC));
-            log.info("HubEventProcessor подписался на топик: {}", HUBS_TOPIC);
+            hubEventConsumer.subscribe(java.util.List.of(hubsTopic));
+            log.info("HubEventProcessor подписался на топик: {}", hubsTopic);
 
             while (true) {
-                ConsumerRecords<String, Object> records = hubEventConsumer.poll(Duration.ofMillis(pollTimeout));
+                ConsumerRecords<String, HubEventAvro> records = hubEventConsumer.poll(Duration.ofMillis(pollTimeout));
 
                 if (records.isEmpty()) {
                     continue;
@@ -41,7 +42,7 @@ public class HubEventProcessor implements Runnable {
 
                 for (var record : records) {
                     try {
-                        HubEventAvro event = (HubEventAvro) record.value();
+                        HubEventAvro event = record.value();
                         scenarioService.processHubEvent(event);
                     } catch (Exception e) {
                         log.error("Ошибка обработки события от хаба", e);
