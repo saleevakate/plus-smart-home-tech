@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.yandex.practicum.analyzer.deserealizer.HubEventDeserializer;
 import ru.yandex.practicum.analyzer.deserealizer.SensorsSnapshotDeserializer;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +48,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public Consumer<String, Object> snapshotConsumer() {
+    public Consumer<String, SensorsSnapshotAvro> snapshotConsumer() {
         return new KafkaConsumer<>(snapshotConsumerProperties());
     }
 
     @Bean
-    public Consumer<String, Object> hubEventConsumer() {
+    public Consumer<String, HubEventAvro> hubEventConsumer() {
         return new KafkaConsumer<>(hubEventConsumerProperties());
     }
 }

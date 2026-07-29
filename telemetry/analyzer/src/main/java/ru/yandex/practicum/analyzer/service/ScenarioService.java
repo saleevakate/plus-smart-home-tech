@@ -29,7 +29,7 @@ public class ScenarioService {
 
     @Transactional
     public void processHubEvent(HubEventAvro event) {
-        String hubId = event.getHubId().toString();
+        String hubId = event.getHubId();
 
         if (event.getPayload() instanceof DeviceAddedEventAvro) {
             DeviceAddedEventAvro device = (DeviceAddedEventAvro) event.getPayload();
@@ -48,7 +48,7 @@ public class ScenarioService {
 
     @Transactional
     public void processSnapshot(SensorsSnapshotAvro snapshot) {
-        String hubId = snapshot.getHubId().toString();
+        String hubId = snapshot.getHubId();
 
         List<Scenario> scenarios = scenarioRepository.findByHubId(hubId);
 
@@ -121,8 +121,14 @@ public class ScenarioService {
 
     @Transactional
     public void processDeviceAdded(String hubId, DeviceAddedEventAvro event) {
+        String sensorId = event.getId();
+
+        if (sensorRepository.existsById(sensorId)) {
+            log.debug("Датчик {} уже существует", sensorId);
+            return;
+        }
         Sensor sensor = Sensor.builder()
-                .id(event.getId().toString())
+                .id(event.getId())
                 .hubId(hubId)
                 .build();
         sensorRepository.save(sensor);
@@ -131,14 +137,14 @@ public class ScenarioService {
 
     @Transactional
     public void processDeviceRemoved(DeviceRemovedEventAvro event) {
-        String sensorId = event.getId().toString();
+        String sensorId = event.getId();
         sensorRepository.deleteById(sensorId);
         log.info("Датчик {} удалён", sensorId);
     }
 
     @Transactional
     public void processScenarioAdded(String hubId, ScenarioAddedEventAvro event) {
-        Optional<Scenario> existing = scenarioRepository.findByHubIdAndName(hubId, event.getName().toString());
+        Optional<Scenario> existing = scenarioRepository.findByHubIdAndName(hubId, event.getName());
 
         if (existing.isPresent()) {
             log.warn("Сценарий {} уже существует для хаба {}", event.getName(), hubId);
@@ -147,13 +153,13 @@ public class ScenarioService {
 
         Scenario scenario = Scenario.builder()
                 .hubId(hubId)
-                .name(event.getName().toString())
+                .name(event.getName())
                 .build();
 
         scenario = scenarioRepository.save(scenario);
 
         for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
-            String sensorId = conditionAvro.getSensorId().toString();
+            String sensorId = conditionAvro.getSensorId();
             Optional<Sensor> sensorOpt = sensorRepository.findById(sensorId);
 
             if (sensorOpt.isEmpty()) {
@@ -185,7 +191,7 @@ public class ScenarioService {
         }
 
         for (DeviceActionAvro actionAvro : event.getActions()) {
-            String sensorId = actionAvro.getSensorId().toString();
+            String sensorId = actionAvro.getSensorId();
             Optional<Sensor> sensorOpt = sensorRepository.findById(sensorId);
 
             if (sensorOpt.isEmpty()) {
@@ -220,7 +226,7 @@ public class ScenarioService {
 
     @Transactional
     public void processScenarioRemoved(String hubId, ScenarioRemovedEventAvro event) {
-        String name = event.getName().toString();
+        String name = event.getName();
         Optional<Scenario> existing = scenarioRepository.findByHubIdAndName(hubId, name);
 
         if (existing.isPresent()) {
