@@ -3,7 +3,6 @@ spring:
     name: aggregator
 
 kafka:
-  bootstrap-servers: localhost:9092
   poll:
     timeout: 1000
   consumer:

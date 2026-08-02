@@ -1,10 +1,15 @@
-server:
-  port: 8080
-
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092
+  application:
+    name: collector
+
+server:
+  port: 0
 
 grpc:
   server:
     port: 59091
+
+eureka:
+  instance:
+    metadata-map:
+      gRPC_port: ${grpc.server.port}
