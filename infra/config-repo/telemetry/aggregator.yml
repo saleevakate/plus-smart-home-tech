@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: aggregator
+
+kafka:
+  poll:
+    timeout: 1000
+  consumer:
+    group-id: aggregator-group
