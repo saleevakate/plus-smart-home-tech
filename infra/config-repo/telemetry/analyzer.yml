@@ -20,6 +20,7 @@ grpc:
       negotiationType: plaintext
 
 kafka:
+  bootstrap-servers: localhost:9092
   poll:
     timeout: 1000
   topics:
