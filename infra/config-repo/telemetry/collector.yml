@@ -1,6 +1,9 @@
 spring:
   application:
     name: collector
+  cloud:
+    config:
+      enabled: true
 
 server:
   port: 0

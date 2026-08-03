@@ -3,10 +3,3 @@ spring:
     name: aggregator
   config:
     import: optional:configserver:http://localhost:8888
-
-kafka:
-  bootstrap-servers: localhost:9092
-  poll:
-    timeout: 1000
-  consumer:
-    group-id: aggregator-group
