@@ -4,11 +4,11 @@ spring:
   config:
     import: optional:configserver:http://localhost:8888
 
-datasource:
-  url: jdbc:postgresql://localhost:5432/smart_home
-  username: postgres
-  password: postgres
-  driver-class-name: org.postgresql.Driver
+  datasource:
+    url: jdbc:postgresql://localhost:5432/telemetry_analyzer
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -19,6 +19,7 @@ datasource:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  # Включаем инициализацию из schema.sql
   sql:
     init:
       mode: always
