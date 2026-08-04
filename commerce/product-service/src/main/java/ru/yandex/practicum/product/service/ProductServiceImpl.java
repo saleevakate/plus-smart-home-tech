@@ -54,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId())
+        Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new RuntimeException("Категория не найдена"));
 
         Product product = productMapper.toEntity(request, category);
@@ -69,8 +69,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Товар не найден"));
 
         Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
+        if (request.categoryId() != null) {
+            category = categoryRepository.findById(request.categoryId())
                     .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена"));
         }
 

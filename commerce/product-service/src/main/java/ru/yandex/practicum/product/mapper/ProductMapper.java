@@ -38,27 +38,27 @@ public class ProductMapper {
         }
 
         return Product.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .imageUrl(request.getImageUrl())
+                .name(request.name())
+                .description(request.description())
+                .price(request.price())
+                .imageUrl(request.imageUrl())
                 .active(true)
                 .category(category)
                 .build();
     }
 
     public void updateEntity(Product product, ProductRequest request, Category category) {
-        if (request.getName() != null) {
-            product.setName(request.getName());
+        if (request.name() != null) {
+            product.setName(request.name());
         }
-        if (request.getDescription() != null) {
-            product.setDescription(request.getDescription());
+        if (request.description() != null) {
+            product.setDescription(request.description());
         }
-        if (request.getPrice() != null) {
-            product.setPrice(request.getPrice());
+        if (request.price() != null) {
+            product.setPrice(request.price());
         }
-        if (request.getImageUrl() != null) {
-            product.setImageUrl(request.getImageUrl());
+        if (request.imageUrl() != null) {
+            product.setImageUrl(request.imageUrl());
         }
         if (category != null) {
             product.setCategory(category);

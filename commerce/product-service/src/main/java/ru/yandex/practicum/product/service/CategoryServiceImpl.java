@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.product.dto.CategoryRequest;
 import ru.yandex.practicum.product.dto.CategoryResponse;
 import ru.yandex.practicum.product.exception.CategoryNotFoundException;
+import ru.yandex.practicum.product.mapper.CategoryMapper;
 import ru.yandex.practicum.product.model.Category;
 import ru.yandex.practicum.product.repository.CategoryRepository;
 
@@ -16,37 +17,24 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+        return categoryRepository.findAll().stream().map(categoryMapper::toResponse).toList();
     }
 
     @Override
     public CategoryResponse getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена"));
-        return toResponse(category);
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException("Категория не найдена"));
+        return categoryMapper.toResponse(category);
     }
 
     @Override
     @Transactional
     public CategoryResponse createCategory(CategoryRequest request) {
-        Category category = Category.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .build();
+        Category category = categoryMapper.toEntity(request);
         Category saved = categoryRepository.save(category);
-        return toResponse(saved);
-    }
-
-    private CategoryResponse toResponse(Category category) {
-        return new CategoryResponse(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
+        return categoryMapper.toResponse(saved);
     }
 }

@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.order.dto.OrderItemRequest;
-import ru.yandex.practicum.order.dto.OrderItemResponse;
 import ru.yandex.practicum.order.dto.OrderRequest;
 import ru.yandex.practicum.order.dto.OrderResponse;
 import ru.yandex.practicum.order.exception.OrderNotFoundException;
+import ru.yandex.practicum.order.mapper.OrderMapper;
 import ru.yandex.practicum.order.model.Order;
 import ru.yandex.practicum.order.model.OrderItem;
 import ru.yandex.practicum.order.repository.OrderRepository;
@@ -22,39 +22,28 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
 
     @Override
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
-        log.info("Создание заказа для клиента: {}", request.getCustomerEmail());
+        log.info("Создание заказа для клиента: {}", request.customerEmail());
 
-        Order order = Order.builder()
-                .customerName(request.getCustomerName())
-                .customerEmail(request.getCustomerEmail())
-                .totalPrice(BigDecimal.ZERO)
-                .status("CREATED")
-                .build();
+        Order order = orderMapper.toEntity(request);
 
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (OrderItemRequest itemRequest : request.getItems()) {
-            OrderItem item = OrderItem.builder()
-                    .order(order)
-                    .productId(itemRequest.getProductId())
-                    .productName(itemRequest.getProductName())
-                    .quantity(itemRequest.getQuantity())
-                    .price(itemRequest.getPrice())
-                    .build();
-
+        for (OrderItemRequest itemRequest : request.items()) {
+            OrderItem item = orderMapper.toItemEntity(order, itemRequest);
             order.getItems().add(item);
-            total = total.add(itemRequest.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
         }
-
+        BigDecimal total = order.getItems().stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalPrice(total);
+
         Order saved = orderRepository.save(order);
         log.info("Заказ создан с ID: {}, общая сумма: {}", saved.getId(), saved.getTotalPrice());
 
-        return toResponse(saved);
+        return orderMapper.toResponse(saved);
     }
 
     @Override
@@ -62,14 +51,14 @@ public class OrderServiceImpl implements OrderService {
         log.info("Поиск заказа по ID: {}", id);
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Заказ не найден с ID: " + id));
-        return toResponse(order);
+        return orderMapper.toResponse(order);
     }
 
     @Override
     public List<OrderResponse> getAllOrders() {
         log.info("Запрос всех заказов");
         return orderRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(orderMapper::toResponse)
                 .toList();
     }
 
@@ -77,29 +66,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderResponse> getOrdersByEmail(String email) {
         log.info("Поиск заказов по email: {}", email);
         return orderRepository.findByCustomerEmail(email).stream()
-                .map(this::toResponse)
+                .map(orderMapper::toResponse)
                 .toList();
     }
-
-    private OrderResponse toResponse(Order order) {
-        List<OrderItemResponse> itemResponses = order.getItems().stream()
-                .map(item -> new OrderItemResponse(
-                        item.getProductId(),
-                        item.getProductName(),
-                        item.getQuantity(),
-                        item.getPrice()
-                ))
-                .toList();
-
-        return new OrderResponse(
-                order.getId(),
-                order.getCustomerName(),
-                order.getCustomerEmail(),
-                order.getTotalPrice(),
-                order.getStatus(),
-                order.getCreatedAt(),
-                itemResponses
-        );
-    }
-
 }

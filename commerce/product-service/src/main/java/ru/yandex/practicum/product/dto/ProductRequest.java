@@ -3,24 +3,14 @@ package ru.yandex.practicum.product.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Data
-public class ProductRequest {
-
-    @NotBlank
-    private String name;
-
-    private String description;
-
-    @NotNull
-    @Positive
-    private BigDecimal price;
-
-    @NotNull
-    private Long categoryId;
-
-    private String imageUrl;
+public record ProductRequest(
+        @NotBlank String name,
+        String description,
+        @NotNull @Positive BigDecimal price,
+        @NotNull Long categoryId,
+        String imageUrl
+) {
 }
