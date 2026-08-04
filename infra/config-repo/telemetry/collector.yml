@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: collector
+  cloud:
+    config:
+      enabled: true
+
+server:
+  port: 0
+
+grpc:
+  server:
+    port: 59091
+
+kafka:
+  bootstrap-servers: localhost:9092
+
+eureka:
+  instance:
+    metadata-map:
+      gRPC_port: ${grpc.server.port}
