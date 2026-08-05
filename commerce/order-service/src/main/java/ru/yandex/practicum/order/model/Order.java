@@ -42,4 +42,7 @@ public class Order {
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
+    @Column(name = "status_details")
+    private String statusDetails;
+
 }

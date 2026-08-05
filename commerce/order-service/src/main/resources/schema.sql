@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_email VARCHAR(255) NOT NULL,
     total_price DECIMAL(19, 2) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'CREATED',
+    status_details VARCHAR(512),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

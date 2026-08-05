@@ -30,7 +30,8 @@ public class OrderMapper {
                 order.getTotalPrice(),
                 order.getStatus(),
                 order.getCreatedAt(),
-                itemResponses
+                itemResponses,
+                order.getStatusDetails()
         );
     }
 
@@ -55,9 +56,7 @@ public class OrderMapper {
         return OrderItem.builder()
                 .order(order)
                 .productId(itemRequest.productId())
-                .productName(itemRequest.productName())
                 .quantity(itemRequest.quantity())
-                .price(itemRequest.price())
                 .build();
     }
 

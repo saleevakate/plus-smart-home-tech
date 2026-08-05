@@ -13,6 +13,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(OrderProcessingException.class)
+    public ResponseEntity<Map<String, String>> handleOrderProcessing(OrderProcessingException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleOrderNotFound(OrderNotFoundException ex) {
         Map<String, String> error = new HashMap<>();
