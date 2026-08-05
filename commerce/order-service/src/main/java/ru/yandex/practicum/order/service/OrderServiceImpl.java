@@ -8,9 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.order.dto.OrderItemRequest;
 import ru.yandex.practicum.order.dto.OrderRequest;
 import ru.yandex.practicum.order.dto.OrderResponse;
+import ru.yandex.practicum.order.exception.InventoryServiceUnavailableException;
 import ru.yandex.practicum.order.exception.OrderNotFoundException;
 import ru.yandex.practicum.order.exception.OrderProcessingException;
+import ru.yandex.practicum.order.exception.ProductServiceUnavailableException;
 import ru.yandex.practicum.order.feign.*;
+import ru.yandex.practicum.order.feign.client.InventoryClient;
+import ru.yandex.practicum.order.feign.client.ProductClient;
+import ru.yandex.practicum.order.feign.dto.ProductDto;
+import ru.yandex.practicum.order.feign.dto.ReserveRequest;
+import ru.yandex.practicum.order.feign.dto.ReserveResponse;
 import ru.yandex.practicum.order.mapper.OrderMapper;
 import ru.yandex.practicum.order.model.Order;
 import ru.yandex.practicum.order.model.OrderItem;
@@ -33,6 +40,17 @@ public class OrderServiceImpl implements OrderService {
     private final ProductClient productClient;
     private final InventoryClient inventoryClient;
 
+    private ProductDto createDegradedProduct(Long productId) {
+        return new ProductDto(
+                productId,
+                "Товар #" + productId + " (ожидает проверки)",
+                "Данные товара временно недоступны",
+                BigDecimal.ZERO,
+                null,
+                false
+        );
+    }
+
     @Override
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
@@ -47,30 +65,41 @@ public class OrderServiceImpl implements OrderService {
         log.info("Группировка товаров: {}", productQuantityMap);
 
         Map<Long, ProductDto> productCache = new HashMap<>();
+        boolean productServiceDegraded = false;
+
         for (Long productId : productQuantityMap.keySet()) {
-            try {
-                ProductDto product = productClient.getProductById(productId);
+            ServiceCallResult<ProductDto> result = getProductById(productId);
 
-                if (!product.active()) {
-                    throw new OrderProcessingException("Товар с ID " + productId + " снят с продажи");
+            switch (result) {
+                case ServiceCallResult.Success<ProductDto>(ProductDto value) -> {
+                    if (!value.active()) {
+                        throw new OrderProcessingException("Товар с ID " + productId + " снят с продажи");
+                    }
+                    productCache.put(productId, value);
+                    log.info("Получены данные товара: id={}, name={}", productId, value.name());
                 }
-
-                productCache.put(productId, product);
-                log.info("Получены данные товара: id={}, name={}", productId, product.name());
-
-            } catch (FeignException.NotFound e) {
-                throw new OrderProcessingException("Товар с ID " + productId + " не найден");
-            } catch (FeignException e) {
-                throw new OrderProcessingException("Ошибка получения данных товара: " + e.getMessage());
+                case ServiceCallResult.Failure<ProductDto>(String message) ->
+                        throw new OrderProcessingException(message);
+                case ServiceCallResult.Degraded<ProductDto>(String reason) -> {
+                    log.warn("Сервис каталога недоступен: {}", reason);
+                    productServiceDegraded = true;
+                    productCache.put(productId, createDegradedProduct(productId));
+                }
+                default -> {
+                }
             }
         }
 
         Order order = Order.builder()
                 .customerName(request.customerName())
                 .customerEmail(request.customerEmail())
-                .status("PENDING")
+                .status(productServiceDegraded ? "PENDING_CONFIRMATION" : "PENDING")
                 .totalPrice(BigDecimal.ZERO)
                 .build();
+
+        if (productServiceDegraded) {
+            order.setStatusDetails("Заказ требует ручной проверки: данные каталога временно недоступны");
+        }
 
         BigDecimal total = BigDecimal.ZERO;
 
@@ -89,37 +118,93 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
         log.info("Заказ сохранен с ID: {}, статус: {}", savedOrder.getId(), savedOrder.getStatus());
 
+        if (productServiceDegraded) {
+            log.info("Заказ сохранен с статусом PENDING_CONFIRMATION из-за недоступности каталога");
+            return orderMapper.toResponse(savedOrder);
+        }
+
         List<ReservedItem> reservedItems = new ArrayList<>();
+        boolean inventoryServiceDegraded = false;
+
         try {
+            label:
             for (Map.Entry<Long, Integer> entry : productQuantityMap.entrySet()) {
                 Long productId = entry.getKey();
                 Integer quantity = entry.getValue();
 
                 ReserveRequest reserveRequest = new ReserveRequest(productId, quantity);
+                ServiceCallResult<ReserveResponse> result = reserveStock(reserveRequest);
 
-                try {
-                    ReserveResponse response = inventoryClient.reserveStock(reserveRequest);
-                    reservedItems.add(new ReservedItem(productId, quantity));
-                    log.info("Товар {} зарезервирован в количестве {}", productId, quantity);
-
-                } catch (FeignException.NotFound e) {
-                    throw new OrderProcessingException("Складская запись для товара " + productId + " не найдена");
-                } catch (FeignException.Conflict e) {
-                    throw new OrderProcessingException("Недостаточно товара " + productId + " на складе");
-                } catch (FeignException e) {
-                    throw new OrderProcessingException("Ошибка резервирования товара " + productId);
+                switch (result) {
+                    case ServiceCallResult.Success<ReserveResponse> success:
+                        reservedItems.add(new ReservedItem(productId, quantity));
+                        log.info("Товар {} зарезервирован в количестве {}", productId, quantity);
+                        break;
+                    case ServiceCallResult.Failure<ReserveResponse>(String message):
+                        throw new OrderProcessingException(message);
+                    case ServiceCallResult.Degraded<ReserveResponse>(String reason):
+                        log.warn("Сервис склада недоступен: {}", reason);
+                        inventoryServiceDegraded = true;
+                        break label;
+                    default:
+                        break;
                 }
             }
 
+            if (inventoryServiceDegraded) {
+                log.info("Заказ переведен в статус PENDING_CONFIRMATION из-за недоступности склада");
+                savedOrder.setStatus("PENDING_CONFIRMATION");
+                savedOrder.setStatusDetails("Заказ требует ручной проверки: сервис склада временно недоступен");
+                Order confirmedOrder = orderRepository.save(savedOrder);
+                return orderMapper.toResponse(confirmedOrder);
+            }
+
             savedOrder.setStatus("CONFIRMED");
+            savedOrder.setStatusDetails(null);
             Order confirmedOrder = orderRepository.save(savedOrder);
             log.info("Заказ {} подтвержден", confirmedOrder.getId());
             return orderMapper.toResponse(confirmedOrder);
 
-        } catch (Exception e) {
+        } catch (OrderProcessingException e) {
             log.error("Ошибка создания заказа, выполняем откат резервов", e);
             releaseReservations(reservedItems);
             throw e;
+        } catch (Exception e) {
+            log.error("Неожиданная ошибка создания заказа, выполняем откат резервов", e);
+            releaseReservations(reservedItems);
+            throw new OrderProcessingException("Ошибка создания заказа: " + e.getMessage());
+        }
+    }
+
+    private ServiceCallResult<ProductDto> getProductById(Long productId) {
+        try {
+            ProductDto product = productClient.getProductById(productId);
+            return new ServiceCallResult.Success<>(product);
+        } catch (ProductServiceUnavailableException e) {
+            return new ServiceCallResult.Degraded<>("Сервис каталога временно недоступен");
+        } catch (FeignException.NotFound e) {
+            return new ServiceCallResult.Failure<>("Товар с ID " + productId + " не найден");
+        } catch (FeignException e) {
+            return new ServiceCallResult.Failure<>("Ошибка получения данных товара");
+        } catch (Exception e) {
+            return new ServiceCallResult.Failure<>("Неизвестная ошибка при получении товара");
+        }
+    }
+
+    private ServiceCallResult<ReserveResponse> reserveStock(ReserveRequest request) {
+        try {
+            ReserveResponse response = inventoryClient.reserveStock(request);
+            return new ServiceCallResult.Success<>(response);
+        } catch (InventoryServiceUnavailableException e) {
+            return new ServiceCallResult.Degraded<>("Сервис склада временно недоступен");
+        } catch (FeignException.NotFound e) {
+            return new ServiceCallResult.Failure<>("Складская запись для товара " + request.productId() + " не найдена");
+        } catch (FeignException.Conflict e) {
+            return new ServiceCallResult.Failure<>("Недостаточно товара " + request.productId() + " на складе");
+        } catch (FeignException e) {
+            return new ServiceCallResult.Failure<>("Ошибка резервирования товара " + request.productId());
+        } catch (Exception e) {
+            return new ServiceCallResult.Failure<>("Неизвестная ошибка при резервировании товара");
         }
     }
 
@@ -165,13 +250,6 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
-    private static class ReservedItem {
-        final Long productId;
-        final Integer quantity;
-
-        ReservedItem(Long productId, Integer quantity) {
-            this.productId = productId;
-            this.quantity = quantity;
-        }
+    private record ReservedItem(Long productId, Integer quantity) {
     }
 }

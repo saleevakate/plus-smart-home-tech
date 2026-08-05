@@ -1,6 +1,6 @@
-package ru.yandex.practicum.order.feign;
+package ru.yandex.practicum.order.feign.dto;
 
-public record InventoryResponse(
+public record ReserveResponse(
         Long productId,
         Integer quantity,
         Integer reservedQuantity,
