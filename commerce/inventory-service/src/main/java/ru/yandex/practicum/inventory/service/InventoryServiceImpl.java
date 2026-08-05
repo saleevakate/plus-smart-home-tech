@@ -123,28 +123,25 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public InventoryResponse release(ReserveRequest request) {
-        log.info("Снятие резерва товара: {}, количество: {}", request.getProductId(), request.getQuantity());
+        log.info("Снятие резерва товара: {}, количество: {}", request.productId(), request.quantity());
 
-        // 1. Находим складскую запись
-        Inventory inventory = inventoryRepository.findByProductId(request.getProductId())
+        Inventory inventory = inventoryRepository.findByProductId(request.productId())
                 .orElseThrow(() -> new InventoryNotFoundException(
-                        "Складская запись не найдена для товара: " + request.getProductId()));
+                        "Складская запись не найдена для товара: " + request.productId()));
 
-        // 2. Проверяем, что зарезервировано достаточно
         int reserved = inventory.getReservedQuantity();
-        if (reserved < request.getQuantity()) {
+        if (reserved < request.quantity()) {
             log.warn("Нельзя снять больше, чем зарезервировано. Товар: {}, зарезервировано: {}, запрошено: {}",
-                    request.getProductId(), reserved, request.getQuantity());
+                    request.productId(), reserved, request.quantity());
             throw new IllegalArgumentException(
-                    "Нельзя снять больше, чем зарезервировано. Зарезервировано: " + reserved + ", запрошено: " + request.getQuantity());
+                    "Нельзя снять больше, чем зарезервировано. Зарезервировано: " + reserved + ", запрошено: " + request.quantity());
         }
 
-        // 3. Уменьшаем зарезервированное количество
-        inventory.setReservedQuantity(reserved - request.getQuantity());
+        inventory.setReservedQuantity(reserved - request.quantity());
         Inventory updated = inventoryRepository.save(inventory);
 
         log.info("Резерв товара {} снят. Зарезервировано: {}, доступно: {}",
-                request.getProductId(),
+                request.productId(),
                 updated.getReservedQuantity(),
                 updated.getQuantity() - updated.getReservedQuantity());
 
