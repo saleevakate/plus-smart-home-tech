@@ -55,9 +55,7 @@ public class OrderMapper {
         return OrderItem.builder()
                 .order(order)
                 .productId(itemRequest.productId())
-                .productName(itemRequest.productName())
                 .quantity(itemRequest.quantity())
-                .price(itemRequest.price())
                 .build();
     }
 

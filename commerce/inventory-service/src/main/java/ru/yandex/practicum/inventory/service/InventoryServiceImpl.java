@@ -119,4 +119,32 @@ public class InventoryServiceImpl implements InventoryService {
 
         return inventoryMapper.toResponse(updated);
     }
+
+    @Override
+    @Transactional
+    public InventoryResponse release(ReserveRequest request) {
+        log.info("Снятие резерва товара: {}, количество: {}", request.productId(), request.quantity());
+
+        Inventory inventory = inventoryRepository.findByProductId(request.productId())
+                .orElseThrow(() -> new InventoryNotFoundException(
+                        "Складская запись не найдена для товара: " + request.productId()));
+
+        int reserved = inventory.getReservedQuantity();
+        if (reserved < request.quantity()) {
+            log.warn("Нельзя снять больше, чем зарезервировано. Товар: {}, зарезервировано: {}, запрошено: {}",
+                    request.productId(), reserved, request.quantity());
+            throw new IllegalArgumentException(
+                    "Нельзя снять больше, чем зарезервировано. Зарезервировано: " + reserved + ", запрошено: " + request.quantity());
+        }
+
+        inventory.setReservedQuantity(reserved - request.quantity());
+        Inventory updated = inventoryRepository.save(inventory);
+
+        log.info("Резерв товара {} снят. Зарезервировано: {}, доступно: {}",
+                request.productId(),
+                updated.getReservedQuantity(),
+                updated.getQuantity() - updated.getReservedQuantity());
+
+        return inventoryMapper.toResponse(updated);
+    }
 }
