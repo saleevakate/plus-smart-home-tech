@@ -10,6 +10,24 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  cloud:
+    openfeign:
+          client:
+            config:
+              default:
+                connectTimeout: 2000
+                readTimeout: 3000
+                loggerLevel: basic
+              inventory-service:
+                connectTimeout: 1000
+                readTimeout: 2000
+                loggerLevel: basic
 
 server:
   port: 0
+
+
+logging:
+  level:
+    ru.yandex.practicum.order.feign.ProductClient: DEBUG
+    ru.yandex.practicum.order.feign.InventoryClient: DEBUG
