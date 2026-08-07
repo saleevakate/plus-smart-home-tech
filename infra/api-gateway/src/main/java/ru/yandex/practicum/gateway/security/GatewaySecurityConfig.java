@@ -27,25 +27,14 @@ public class GatewaySecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/inventory/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PATCH, "/api/products/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PATCH, "/api/categories/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.POST, "/api/inventory/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PUT, "/api/inventory/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PATCH, "/api/inventory/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.DELETE, "/api/inventory/**").hasRole("ADMIN")
+                        //все публичные запросы
+                        .pathMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/inventory/**").permitAll()
+                        //все запросы ADMIN
+                        .pathMatchers("/api/products/**", "/api/categories/**", "/api/inventory/**").hasRole("ADMIN")
+                         //список всех заказов ADMIN
                         .pathMatchers(HttpMethod.GET, "/api/orders").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.POST, "/api/orders/**").hasRole("USER")
-                        .pathMatchers(HttpMethod.GET, "/api/orders/by-email").hasRole("USER")
-                        .pathMatchers(HttpMethod.GET, "/api/orders/{id}").hasRole("USER")
+                        //все запросы USER
+                        .pathMatchers("/api/orders/**").hasRole("USER")
                         .anyExchange().denyAll()
                 )
                 .httpBasic(Customizer.withDefaults())
